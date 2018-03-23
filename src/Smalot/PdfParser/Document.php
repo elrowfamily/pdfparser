@@ -5,24 +5,24 @@
  *          This file is part of the PdfParser library.
  *
  * @author  Sébastien MALOT <sebastien@malot.fr>
- * @date    2013-08-08
- * @license GPL-3.0
+ * @date    2017-01-03
+ * @license LGPLv3
  * @url     <https://github.com/smalot/pdfparser>
  *
  *  PdfParser is a pdf library written in PHP, extraction oriented.
- *  Copyright (C) 2014 - Sébastien MALOT <sebastien@malot.fr>
+ *  Copyright (C) 2017 - Sébastien MALOT <sebastien@malot.fr>
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program.
  *  If not, see <http://www.pdfparser.org/sites/default/LICENSE.txt>.
  *
@@ -49,7 +49,7 @@ use Smalot\PdfParser\Element\ElementDate;
 class Document
 {
     /**
-     * @var Object[]
+     * @var PDFObject[]
      */
     protected $objects = array();
 
@@ -118,7 +118,7 @@ class Document
 
         // Extract document info
         if ($this->trailer->has('Info')) {
-            /** @var Object $info */
+            /** @var PDFObject $info */
             $info = $this->trailer->get('Info');
             if ($info !== null) {
                 $details = $info->getHeader()->getDetails();
@@ -145,7 +145,7 @@ class Document
     }
 
     /**
-     * @param Object[] $objects
+     * @param PDFObject[] $objects
      */
     public function setObjects($objects = array())
     {
@@ -155,7 +155,7 @@ class Document
     }
 
     /**
-     * @return Object[]
+     * @return PDFObject[]
      */
     public function getObjects()
     {
@@ -165,7 +165,7 @@ class Document
     /**
      * @param string $id
      *
-     * @return Object
+     * @return PDFObject
      */
     public function getObjectById($id)
     {
@@ -180,7 +180,7 @@ class Document
      * @param string $type
      * @param string $subtype
      *
-     * @return Object[]
+     * @return PDFObject[]
      */
     public function getObjectsByType($type, $subtype = null)
     {
@@ -198,7 +198,7 @@ class Document
     }
 
     /**
-     * @return \Object[]
+     * @return PDFObject[]
      */
     public function getFonts()
     {
@@ -257,6 +257,12 @@ class Document
         $pages = $this->getPages();
 
         foreach ($pages as $index => $page) {
+            /**
+             * In some cases, the $page variable may be null.
+             */
+            if (is_null($page)) {
+                continue;
+            }
             if ($text = trim($page->getText())) {
                 $texts[] = $text;
             }
@@ -266,7 +272,15 @@ class Document
     }
 
     /**
-     * @param Header $header
+     * @return Header
+     */
+    public function getTrailer()
+    {
+        return $this->trailer;
+    }
+
+    /**
+     * @param Header $trailer
      */
     public function setTrailer(Header $trailer)
     {

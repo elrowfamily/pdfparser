@@ -5,24 +5,24 @@
  *          This file is part of the PdfParser library.
  *
  * @author  Sébastien MALOT <sebastien@malot.fr>
- * @date    2013-08-08
- * @license GPL-3.0
+ * @date    2017-01-03
+ * @license LGPLv3
  * @url     <https://github.com/smalot/pdfparser>
  *
  *  PdfParser is a pdf library written in PHP, extraction oriented.
- *  Copyright (C) 2014 - Sébastien MALOT <sebastien@malot.fr>
+ *  Copyright (C) 2017 - Sébastien MALOT <sebastien@malot.fr>
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program.
  *  If not, see <http://www.pdfparser.org/sites/default/LICENSE.txt>.
  *
@@ -34,11 +34,11 @@ use Smalot\PdfParser\XObject\Form;
 use Smalot\PdfParser\XObject\Image;
 
 /**
- * Class Object
+ * Class PDFObject
  *
  * @package Smalot\PdfParser
  */
-class Object
+class PDFObject
 {
     const TYPE = 't';
 
@@ -99,7 +99,7 @@ class Object
     /**
      * @param string $name
      *
-     * @return Element|Object
+     * @return Element|PDFObject
      */
     public function get($name)
     {
@@ -345,6 +345,12 @@ class Object
                         $args = preg_split('/\s/s', $command[self::COMMAND]);
                         $y    = array_pop($args);
                         $x    = array_pop($args);
+                        if ($current_position_tm['x'] !== false) {
+                            $delta = abs(floatval($x) - floatval($current_position_tm['x']));
+                            if ($delta > 10) {
+                                $text .= "\t";
+                            }
+                        }
                         if ($current_position_tm['y'] !== false) {
                             $delta = abs(floatval($y) - floatval($current_position_tm['y']));
                             if ($delta > 10) {
@@ -381,7 +387,9 @@ class Object
                             $id      = trim(array_pop($args), '/ ');
                             $xobject = $page->getXObject($id);
 
-                            if ( is_object($xobject) && !in_array($xobject->getUniqueId(), self::$recursionStack) ) {
+
+                             // @todo $xobject could be a ElementXRef object, which would then throw an error
+                             if ( is_object($xobject) && $xobject instanceof PDFObject && !in_array($xobject->getUniqueId(), self::$recursionStack) ) {
                                 // Not a circular reference.
                                 $text .= $xobject->getText($page);
                             }
@@ -730,7 +738,7 @@ class Object
      * @param $header   Header
      * @param $content  string
      *
-     * @return Object
+     * @return PDFObject
      */
     public static function factory(Document $document, Header $header, $content)
     {
@@ -744,7 +752,7 @@ class Object
                         return new Form($document, $header, $content);
 
                     default:
-                        return new Object($document, $header, $content);
+                        return new PDFObject($document, $header, $content);
                 }
                 break;
 
@@ -768,7 +776,7 @@ class Object
                 }
 
             default:
-                return new Object($document, $header, $content);
+                return new PDFObject($document, $header, $content);
         }
     }
 

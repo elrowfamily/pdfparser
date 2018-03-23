@@ -5,24 +5,24 @@
  *          This file is part of the PdfParser library.
  *
  * @author  Sébastien MALOT <sebastien@malot.fr>
- * @date    2013-08-08
- * @license GPL-3.0
+ * @date    2017-01-03
+ * @license LGPLv3
  * @url     <https://github.com/smalot/pdfparser>
  *
  *  PdfParser is a pdf library written in PHP, extraction oriented.
- *  Copyright (C) 2014 - Sébastien MALOT <sebastien@malot.fr>
+ *  Copyright (C) 2017 - Sébastien MALOT <sebastien@malot.fr>
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program.
  *  If not, see <http://www.pdfparser.org/sites/default/LICENSE.txt>.
  *
@@ -35,7 +35,7 @@ namespace Smalot\PdfParser;
  *
  * @package Smalot\PdfParser
  */
-class Font extends Object
+class Font extends PDFObject
 {
     /**
      *
@@ -201,7 +201,8 @@ class Font extends Object
                     }
 
                     // Support for : <srcCode1> <srcCodeN> [<dstString1> <dstString2> ... <dstStringN>]
-                    $regexp = '/<(?P<from>[0-9A-F]+)> *<(?P<to>[0-9A-F]+)> *\[(?P<strings>[<>0-9A-F ]+)\][ \r\n]+/is';
+                    // Some PDF file has 2-byte Unicode values on new lines > added \r\n
+                    $regexp = '/<(?P<from>[0-9A-F]+)> *<(?P<to>[0-9A-F]+)> *\[(?P<strings>[\r\n<>0-9A-F ]+)\][ \r\n]+/is';
 
                     preg_match_all($regexp, $section, $matches);
 
@@ -356,26 +357,26 @@ class Font extends Object
         $font_space    = $this->getFontSpaceLimit();
 
         foreach ($commands as $command) {
-            switch ($command[Object::TYPE]) {
+            switch ($command[PDFObject::TYPE]) {
                 case 'n':
-                    if (floatval(trim($command[Object::COMMAND])) < $font_space) {
+                    if (floatval(trim($command[PDFObject::COMMAND])) < $font_space) {
                         $word_position = count($words);
                     }
                     continue(2);
 
                 case '<':
                     // Decode hexadecimal.
-                    $text = self::decodeHexadecimal('<' . $command[Object::COMMAND] . '>');
-                    
+                    $text = self::decodeHexadecimal('<' . $command[PDFObject::COMMAND] . '>');
+
                     if (mb_check_encoding($text, "UTF-8")) {
                         $unicode = true;
                     }
-                    
+
                     break;
 
                 default:
                     // Decode octal (if necessary).
-                    $text = self::decodeOctal($command[Object::COMMAND]);
+                    $text = self::decodeOctal($command[PDFObject::COMMAND]);
             }
 
             // replace escaped chars
@@ -424,7 +425,7 @@ class Font extends Object
                         $char = $decoded;
                     } elseif ($this->has('DescendantFonts')) {
 
-                        if ($this->get('DescendantFonts') instanceof Object) {
+                        if ($this->get('DescendantFonts') instanceof PDFObject) {
                             $fonts   = $this->get('DescendantFonts')->getHeader()->getElements();
                         } else {
                             $fonts   = $this->get('DescendantFonts')->getContent();

@@ -5,24 +5,24 @@
  *          This file is part of the PdfParser library.
  *
  * @author  Sébastien MALOT <sebastien@malot.fr>
- * @date    2013-08-08
- * @license GPL-3.0
+ * @date    2017-01-03
+ * @license LGPLv3
  * @url     <https://github.com/smalot/pdfparser>
  *
  *  PdfParser is a pdf library written in PHP, extraction oriented.
- *  Copyright (C) 2014 - Sébastien MALOT <sebastien@malot.fr>
+ *  Copyright (C) 2017 - Sébastien MALOT <sebastien@malot.fr>
  *
  *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program.
  *  If not, see <http://www.pdfparser.org/sites/default/LICENSE.txt>.
  *
@@ -40,7 +40,7 @@ use Smalot\PdfParser\Element\ElementNull;
  *
  * @package Smalot\PdfParser
  */
-class Page extends Object
+class Page extends PDFObject
 {
     /**
      * @var Font[]
@@ -48,7 +48,7 @@ class Page extends Object
     protected $fonts = null;
 
     /**
-     * @var Object[]
+     * @var PDFObject[]
      */
     protected $xobjects = null;
 
@@ -116,7 +116,7 @@ class Page extends Object
     /**
      * Support for XObject
      *
-     * @return Object[]
+     * @return PDFObject[]
      */
     public function getXObjects()
     {
@@ -155,7 +155,7 @@ class Page extends Object
     /**
      * @param string $id
      *
-     * @return Object
+     * @return PDFObject
      */
     public function getXObject($id)
     {
@@ -188,7 +188,7 @@ class Page extends Object
                 return '';
 			} elseif ($contents instanceof ElementNull) {
 				return '';
-            } elseif ($contents instanceof Object) {
+            } elseif ($contents instanceof PDFObject) {
                 $elements = $contents->getHeader()->getElements();
 
                 if (is_numeric(key($elements))) {
@@ -203,7 +203,7 @@ class Page extends Object
                     }
 
                     $header   = new Header(array(), $this->document);
-                    $contents = new Object($this->document, $header, $new_content);
+                    $contents = new PDFObject($this->document, $header, $new_content);
                 }
             } elseif ($contents instanceof ElementArray) {
                 // Create a virtual global content.
@@ -214,7 +214,7 @@ class Page extends Object
                 }
 
                 $header   = new Header(array(), $this->document);
-                $contents = new Object($this->document, $header, $new_content);
+                $contents = new PDFObject($this->document, $header, $new_content);
             }
 
             return $contents->getText($this);
@@ -236,12 +236,13 @@ class Page extends Object
 				return array();
 			} elseif ($contents instanceof ElementNull) {
 				return array();
-			} elseif ($contents instanceof Object) {
+			} elseif ($contents instanceof PDFObject) {
 				$elements = $contents->getHeader()->getElements();
 
 				if (is_numeric(key($elements))) {
 					$new_content = '';
 
+					/** @var PDFObject $element */
 					foreach ($elements as $element) {
 						if ($element instanceof ElementXRef) {
 							$new_content .= $element->getObject()->getContent();
@@ -251,18 +252,19 @@ class Page extends Object
 					}
 
 					$header   = new Header(array(), $this->document);
-					$contents = new Object($this->document, $header, $new_content);
+					$contents = new PDFObject($this->document, $header, $new_content);
 				}
 			} elseif ($contents instanceof ElementArray) {
 				// Create a virtual global content.
 				$new_content = '';
 
-				foreach ($contents->getContent() as $content) {
+				/** @var PDFObject $content */
+          foreach ($contents->getContent() as $content) {
 					$new_content .= $content->getContent() . "\n";
 				}
 
 				$header   = new Header(array(), $this->document);
-				$contents = new Object($this->document, $header, $new_content);
+				$contents = new PDFObject($this->document, $header, $new_content);
 			}
 
 			return $contents->getTextArray($this);

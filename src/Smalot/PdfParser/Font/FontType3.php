@@ -28,25 +28,15 @@
  *
  */
 
-namespace Smalot\PdfParser\XObject;
+namespace Smalot\PdfParser\Font;
 
-use Smalot\PdfParser\PDFObject;
-use Smalot\PdfParser\Page;
+use Smalot\PdfParser\Font;
 
 /**
- * Class Image
+ * Class FontType3
  *
- * @package Smalot\PdfParser\XObject
+ * @package Smalot\PdfParser\Font
  */
-class Image extends PDFObject
+class FontType3 extends Font
 {
-    /**
-     * @param Page $page
-     *
-     * @return string
-     */
-    public function getText(Page $page = null)
-    {
-        return '';
-    }
 }
