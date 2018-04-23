@@ -1,5 +1,5 @@
 {
-    "name": "smalot/pdfparser",
+    "name": "elrowfamily/pdfparser",
     "description": "Pdf parser library. Can read and extract information from pdf file.",
     "keywords": ["PDF", "text", "parser", "parse", "extract"],
     "type": "library",
@@ -11,7 +11,7 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/smalot/pdfparser/issues"
+        "issues": "https://github.com/elrowfamily/pdfparser/issues"
     },
     "homepage": "https://www.pdfparser.org",
     "require": {
@@ -25,7 +25,7 @@
     },
     "autoload": {
         "psr-0": {
-            "Smalot\\PdfParser\\": "src/"
+            "Elrowfamily\\PdfParser\\": "src/"
         }
     },
     "autoload-dev": {
