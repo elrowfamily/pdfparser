@@ -284,7 +284,8 @@ class PDFObject
                         ) {
                             // vertical offset
                             $text .= "\n";
-                        } elseif (false !== $current_position_td['x'] && (float) $x > (float) (
+                        }
+                        elseif ($current_position_td['x'] !== false && floatval($x) > floatval(
                                 $current_position_td['x']
                             )
                         ) {
